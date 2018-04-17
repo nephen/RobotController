@@ -6,17 +6,23 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>551</width>
-    <height>481</height>
+    <width>997</width>
+    <height>637</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>CAN Example</string>
+   <string>Robot Controller</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
      <widget class="SendFrameBox" name="sendFrameBox">
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>16777215</height>
+       </size>
+      </property>
       <property name="title">
        <string>Send CAN frame</string>
       </property>
@@ -76,8 +82,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>551</width>
-     <height>19</height>
+     <width>997</width>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuCalls">
@@ -116,7 +122,7 @@
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionConnect">
    <property name="icon">
-    <iconset resource="can.qrc">
+    <iconset resource="robot.qrc">
      <normaloff>:/images/connect.png</normaloff>:/images/connect.png</iconset>
    </property>
    <property name="text">
@@ -125,7 +131,7 @@
   </action>
   <action name="actionDisconnect">
    <property name="icon">
-    <iconset resource="can.qrc">
+    <iconset resource="robot.qrc">
      <normaloff>:/images/disconnect.png</normaloff>:/images/disconnect.png</iconset>
    </property>
    <property name="text">
@@ -134,7 +140,7 @@
   </action>
   <action name="actionQuit">
    <property name="icon">
-    <iconset resource="can.qrc">
+    <iconset resource="robot.qrc">
      <normaloff>:/images/application-exit.png</normaloff>:/images/application-exit.png</iconset>
    </property>
    <property name="text">
@@ -148,7 +154,7 @@
   </action>
   <action name="actionClearLog">
    <property name="icon">
-    <iconset resource="can.qrc">
+    <iconset resource="robot.qrc">
      <normaloff>:/images/clear.png</normaloff>:/images/clear.png</iconset>
    </property>
    <property name="text">
@@ -174,7 +180,7 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="can.qrc"/>
+  <include location="robot.qrc"/>
  </resources>
  <connections/>
 </ui>
