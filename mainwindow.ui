@@ -14,66 +14,97 @@
    <string>Robot Controller</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout">
+   <layout class="QVBoxLayout" name="verticalLayout_4">
     <item>
-     <widget class="SendFrameBox" name="sendFrameBox">
-      <property name="maximumSize">
-       <size>
-        <width>16777215</width>
-        <height>16777215</height>
-       </size>
-      </property>
-      <property name="title">
-       <string>Send CAN frame</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QGroupBox" name="receivedMessagesBox">
-      <property name="title">
-       <string>Received CAN messages</string>
-      </property>
-      <layout class="QVBoxLayout" name="verticalLayout_4">
-       <item>
-        <widget class="QLabel" name="label_3">
-         <property name="font">
-          <font>
-           <family>Courier</family>
-           <kerning>false</kerning>
-          </font>
-         </property>
-         <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
-         </property>
-         <property name="text">
-          <string>Timestamp        Flags  CAN-ID   DLC  Data</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QTextEdit" name="receivedMessagesEdit">
-         <property name="font">
-          <font>
-           <family>Courier</family>
-           <kerning>false</kerning>
-          </font>
-         </property>
-         <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
-         </property>
-         <property name="undoRedoEnabled">
-          <bool>false</bool>
-         </property>
-         <property name="lineWrapMode">
-          <enum>QTextEdit::NoWrap</enum>
-         </property>
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QTabWidget" name="tabWidget">
+          <property name="currentIndex">
+           <number>0</number>
+          </property>
+          <widget class="QWidget" name="Test">
+           <attribute name="title">
+            <string>Test</string>
+           </attribute>
+          </widget>
+          <widget class="QWidget" name="Terminal">
+           <attribute name="title">
+            <string>Terminal</string>
+           </attribute>
+           <layout class="QVBoxLayout" name="verticalLayout_8">
+            <item>
+             <layout class="QVBoxLayout" name="terminalVerticalLayout">
+              <item>
+               <widget class="SendFrameBox" name="sendFrameBox">
+                <property name="maximumSize">
+                 <size>
+                  <width>16777215</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="title">
+                 <string>Send CAN frame</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QGroupBox" name="receivedMessagesBox">
+                <property name="title">
+                 <string>Received CAN messages</string>
+                </property>
+                <layout class="QVBoxLayout" name="verticalLayout_2">
+                 <item>
+                  <widget class="QLabel" name="label_3">
+                   <property name="font">
+                    <font>
+                     <family>Courier</family>
+                     <kerning>false</kerning>
+                    </font>
+                   </property>
+                   <property name="frameShape">
+                    <enum>QFrame::StyledPanel</enum>
+                   </property>
+                   <property name="text">
+                    <string>Timestamp        Flags  CAN-ID   DLC  Data</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QTextEdit" name="receivedMessagesEdit">
+                   <property name="font">
+                    <font>
+                     <family>Courier</family>
+                     <kerning>false</kerning>
+                    </font>
+                   </property>
+                   <property name="frameShape">
+                    <enum>QFrame::StyledPanel</enum>
+                   </property>
+                   <property name="undoRedoEnabled">
+                    <bool>false</bool>
+                   </property>
+                   <property name="lineWrapMode">
+                    <enum>QTextEdit::NoWrap</enum>
+                   </property>
+                   <property name="readOnly">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>
@@ -167,6 +198,16 @@
    </property>
    <property name="toolTip">
     <string>Open plugin documentation in Webbrowser</string>
+   </property>
+  </action>
+  <action name="actionTerminal">
+   <property name="text">
+    <string>&amp;Terminal</string>
+   </property>
+  </action>
+  <action name="actionMotor">
+   <property name="text">
+    <string>&amp;Motor</string>
    </property>
   </action>
  </widget>

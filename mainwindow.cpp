@@ -64,13 +64,13 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     m_ui->setupUi(this);
 
-    m_connectDialog = new ConnectDialog;
-
     m_status = new QLabel;
     m_ui->statusBar->addPermanentWidget(m_status);
 
     m_written = new QLabel;
     m_ui->statusBar->addWidget(m_written);
+
+    m_connectDialog = new ConnectDialog;
 
     initActionsConnections();
     QTimer::singleShot(50, m_connectDialog, &ConnectDialog::show);
