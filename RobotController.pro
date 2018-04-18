@@ -1,4 +1,4 @@
-QT += serialbus widgets
+QT += serialbus widgets charts
 
 TARGET = RobotController
 TEMPLATE = app
@@ -8,17 +8,20 @@ SOURCES += \
     connectdialog.cpp \
     main.cpp \
     mainwindow.cpp \
-    sendframebox.cpp
+    sendframebox.cpp \
+    themewidget.cpp
 
 HEADERS += \
     bitratebox.h \
     connectdialog.h \
     mainwindow.h \
-    sendframebox.h
+    sendframebox.h \
+    themewidget.h
 
 FORMS   += mainwindow.ui \
     connectdialog.ui \
-    sendframebox.ui
+    sendframebox.ui \
+    themewidget.ui
 
 RESOURCES += \
     robot.qrc
