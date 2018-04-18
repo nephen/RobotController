@@ -6,6 +6,7 @@
 #include <QtCharts/QChartGlobal>
 #include <QTimer>
 #include <QtCharts/QSplineSeries>
+#include <QtCharts/QValueAxis>
 
 namespace Ui {
 class ThemeWidget;
@@ -42,28 +43,42 @@ public slots:
     void handleTimeout();
 
 private:
-    DataTable generateRandomData(int listCount, int valueMax, int valueCount) const;
     void populateThemeBox();
     void populateAnimationBox();
     void populateLegendBox();
     void initBoxConnections();
     void initChartTimer();
-    QChart *createAreaChart() const;
-    QChart *createBarChart(int valueCount) const;
-    QChart *createPieChart() const;
-    QChart *createLineChart() const;
-    QChart *createSplineChart() const;
-    QChart *createScatterChart() const;
+    void initValues();
+    QChart *createSpeedSplineChart() const;
+    QChart *createPositionSplineChart() const;
+    QChart *createCurrentSplineChart() const;
 
 private:
-    int m_listCount;
-    int m_valueMax;
-    int m_valueCount;
+    int m_speedValueMax;
+    int m_positionValueMax;
+    int m_currentValueMax;
+
+    int m_speedValueCount;
+    int m_positionValueCount;
+    int m_currentValueCount;
+
     QList<QChartView *> m_charts;
-    DataTable m_dataTable;
     Ui::ThemeWidget *m_ui;
     QTimer m_timer;
-    QSplineSeries *splineSeries;
+
+    QChart *speedSplineChart;
+    QChart *positionSplineChart;
+    QChart *currentSplineChart;
+
+    QSplineSeries *speedSplineSeries;
+    QSplineSeries *positionSplineSeries;
+    QSplineSeries *currentSplineSeries;
+    QValueAxis *m_speed_axis;
+    QValueAxis *m_position_axis;
+    QValueAxis *m_current_axis;
+
+    qreal m_x;
+    qreal m_y;
 };
 
 #endif // THEMEWIDGET_H

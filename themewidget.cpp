@@ -2,16 +2,6 @@
 #include "ui_themewidget.h"
 
 #include <QtCharts/QChartView>
-#include <QtCharts/QPieSeries>
-#include <QtCharts/QPieSlice>
-#include <QtCharts/QAbstractBarSeries>
-#include <QtCharts/QPercentBarSeries>
-#include <QtCharts/QStackedBarSeries>
-#include <QtCharts/QBarSeries>
-#include <QtCharts/QBarSet>
-#include <QtCharts/QLineSeries>
-#include <QtCharts/QScatterSeries>
-#include <QtCharts/QAreaSeries>
 #include <QtCharts/QLegend>
 #include <QtWidgets/QGridLayout>
 #include <QtWidgets/QFormLayout>
@@ -21,21 +11,26 @@
 #include <QtWidgets/QGroupBox>
 #include <QtWidgets/QLabel>
 #include <QtCore/QRandomGenerator>
-#include <QtCharts/QBarCategoryAxis>
 #include <QtWidgets/QApplication>
 #include <QtCharts/QValueAxis>
 #include <QDebug>
 
 ThemeWidget::ThemeWidget(QWidget *parent) :
     QGroupBox(parent),
-    m_listCount(1),
-    m_valueMax(100),
-    m_valueCount(20),
-    m_dataTable(generateRandomData(m_listCount, m_valueMax, m_valueCount)),
-    splineSeries(new QSplineSeries),
-    m_ui(new Ui::ThemeWidget)
+    m_ui(new Ui::ThemeWidget),
+    speedSplineChart(new QChart),
+    positionSplineChart(new QChart),
+    currentSplineChart(new QChart),
+    speedSplineSeries(new QSplineSeries),
+    positionSplineSeries(new QSplineSeries),
+    currentSplineSeries(new QSplineSeries),
+    m_speed_axis(new QValueAxis),
+    m_position_axis(new QValueAxis),
+    m_current_axis(new QValueAxis)
 {
     m_ui->setupUi(this);
+
+    initValues();
     populateThemeBox();
     populateAnimationBox();
     populateLegendBox();
@@ -44,34 +39,25 @@ ThemeWidget::ThemeWidget(QWidget *parent) :
 
     QChartView *chartView;
 
-    chartView = new QChartView(createAreaChart());
+    speedSplineChart = createSpeedSplineChart();
+    chartView = new QChartView(speedSplineChart);
     m_ui->chartsGridLayout->addWidget(chartView, 1, 0);
     m_charts << chartView;
 
-    chartView = new QChartView(createPieChart());
-    // Funny things happen if the pie slice labels do not fit the screen, so we ignore size policy
-    chartView->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+    positionSplineChart = createPositionSplineChart();
+    chartView = new QChartView(positionSplineChart);
     m_ui->chartsGridLayout->addWidget(chartView, 1, 1);
     m_charts << chartView;
 
-    //![5]
-//    chartView = new QChartView(createLineChart());
-//    m_ui->chartsGridLayout->addWidget(chartView, 1, 2);
-//    //![5]
-//    m_charts << chartView;
-
-    chartView = new QChartView(createBarChart(m_valueCount));
+    currentSplineChart = createCurrentSplineChart();
+    chartView = new QChartView(currentSplineChart);
     m_ui->chartsGridLayout->addWidget(chartView, 2, 0);
     m_charts << chartView;
 
-    chartView = new QChartView(createSplineChart());
-    m_ui->chartsGridLayout->addWidget(chartView, 2, 1);
-    m_charts << chartView;
-
-//    chartView = new QChartView(createScatterChart());
-//    m_ui->chartsGridLayout->addWidget(chartView, 2, 2);
+//    currentSplineChart = createCurrentSplineChart();
+//    chartView = new QChartView(currentSplineChart);
+//    m_ui->chartsGridLayout->addWidget(chartView, 2, 1);
 //    m_charts << chartView;
-
     // Set defaults
     m_ui->antialiasCheckBox->setChecked(true);
 
@@ -93,6 +79,20 @@ ThemeWidget::~ThemeWidget()
     delete m_ui;
 }
 
+void ThemeWidget::initValues()
+{
+    m_speedValueMax = 8;
+    m_positionValueMax = 8;
+    m_currentValueMax = 8;
+
+    m_speedValueCount = 100;
+    m_positionValueCount = 100;
+    m_currentValueCount = 100;
+
+    m_x = 100;
+    m_y = 8;
+}
+
 void ThemeWidget::initChartTimer()
 {
     QObject::connect(&m_timer, &QTimer::timeout, this, &ThemeWidget::handleTimeout);
@@ -106,27 +106,6 @@ void ThemeWidget::initBoxConnections()
     QObject::connect(m_ui->antialiasCheckBox, SIGNAL(toggled(bool)), this, SLOT(updateUI()));
     QObject::connect(m_ui->legendComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(updateUI()));
     QObject::connect(m_ui->animatedComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(updateUI()));
-}
-
-DataTable ThemeWidget::generateRandomData(int listCount, int valueMax, int valueCount) const
-{
-    DataTable dataTable;
-
-    // generate random data
-    for (int i(0); i < listCount; i++) {
-        DataList dataList;
-        qreal yValue(0);
-        for (int j(0); j < valueCount; j++) {
-            yValue = yValue + QRandomGenerator::global()->bounded(valueMax / (qreal) valueCount);
-            QPointF value((j + QRandomGenerator::global()->generateDouble()) * ((qreal) m_valueMax / (qreal) valueCount),
-                          yValue);
-            QString label = "Slice " + QString::number(i) + ":" + QString::number(j);
-            dataList << Data(value, label);
-        }
-        dataTable << dataList;
-    }
-
-    return dataTable;
 }
 
 void ThemeWidget::populateThemeBox()
@@ -161,163 +140,54 @@ void ThemeWidget::populateLegendBox()
     m_ui->legendComboBox->addItem("Legend Right", Qt::AlignRight);
 }
 
-QChart *ThemeWidget::createAreaChart() const
+QChart *ThemeWidget::createSpeedSplineChart() const
 {
     QChart *chart = new QChart();
-    chart->setTitle("Area chart");
+    chart->setTitle("speed spline chart");
+    chart->addSeries(speedSplineSeries);
 
-    // The lower series initialized to zero values
-    QLineSeries *lowerSeries = 0;
-    QString name("Series ");
-    int nameIndex = 0;
-    for (int i(0); i < m_dataTable.count(); i++) {
-        QLineSeries *upperSeries = new QLineSeries(chart);
-        for (int j(0); j < m_dataTable[i].count(); j++) {
-            Data data = m_dataTable[i].at(j);
-            if (lowerSeries) {
-                const QVector<QPointF>& points = lowerSeries->pointsVector();
-                upperSeries->append(QPointF(j, points[i].y() + data.first.y()));
-            } else {
-                upperSeries->append(QPointF(j, data.first.y()));
-            }
-        }
-        QAreaSeries *area = new QAreaSeries(upperSeries, lowerSeries);
-        area->setName(name + QString::number(nameIndex));
-        nameIndex++;
-        chart->addSeries(area);
-        lowerSeries = upperSeries;
-    }
+    m_speed_axis->setTickCount(5);
 
     chart->createDefaultAxes();
-    chart->axisX()->setRange(0, m_valueCount - 1);
-    chart->axisY()->setRange(0, m_valueMax);
+    chart->setAxisX(m_speed_axis,speedSplineSeries);
+    chart->axisX()->setRange(0, m_speedValueCount);
+    chart->axisY()->setRange(0, m_speedValueMax);
     // Add space to label to add space between labels and axis
     static_cast<QValueAxis *>(chart->axisY())->setLabelFormat("%.1f  ");
 
     return chart;
 }
 
-QChart *ThemeWidget::createBarChart(int valueCount) const
+QChart *ThemeWidget::createPositionSplineChart() const
 {
-    Q_UNUSED(valueCount);
     QChart *chart = new QChart();
-    chart->setTitle("Bar chart");
+    chart->setTitle("position spline chart");
+    chart->addSeries(positionSplineSeries);
 
-    QStackedBarSeries *series = new QStackedBarSeries(chart);
-    for (int i(0); i < m_dataTable.count(); i++) {
-        QBarSet *set = new QBarSet("Bar set " + QString::number(i));
-        for (const Data &data : m_dataTable[i])
-            *set << data.first.y();
-        series->append(set);
-    }
-    chart->addSeries(series);
+    m_position_axis->setTickCount(5);
 
     chart->createDefaultAxes();
-    chart->axisY()->setRange(0, m_valueMax * 2);
+    chart->setAxisX(m_position_axis,positionSplineSeries);
+    chart->axisX()->setRange(0, m_positionValueCount);
+    chart->axisY()->setRange(0, m_positionValueMax);
     // Add space to label to add space between labels and axis
     static_cast<QValueAxis *>(chart->axisY())->setLabelFormat("%.1f  ");
 
     return chart;
 }
 
-QChart *ThemeWidget::createLineChart() const
-{
-    //![1]
-    QChart *chart = new QChart();
-    chart->setTitle("Line chart");
-    //![1]
-
-    //![2]
-    QString name("Series ");
-    int nameIndex = 0;
-    for (const DataList &list : m_dataTable) {
-        QLineSeries *series = new QLineSeries(chart);
-        for (const Data &data : list)
-            series->append(data.first);
-        series->setName(name + QString::number(nameIndex));
-        nameIndex++;
-        chart->addSeries(series);
-    }
-    //![2]
-
-    //![3]
-    chart->createDefaultAxes();
-    chart->axisX()->setRange(0, m_valueMax);
-    chart->axisY()->setRange(0, m_valueCount);
-    //![3]
-    //![4]
-    // Add space to label to add space between labels and axis
-    static_cast<QValueAxis *>(chart->axisY())->setLabelFormat("%.1f  ");
-    //![4]
-
-    return chart;
-}
-
-QChart *ThemeWidget::createPieChart() const
+QChart *ThemeWidget::createCurrentSplineChart() const
 {
     QChart *chart = new QChart();
-    chart->setTitle("Pie chart");
+    chart->setTitle("current spline chart");
+    chart->addSeries(currentSplineSeries);
 
-    QPieSeries *series = new QPieSeries(chart);
-    for (const Data &data : m_dataTable[0]) {
-        QPieSlice *slice = series->append(data.second, data.first.y());
-        if (data == m_dataTable[0].first()) {
-            // Show the first slice exploded with label
-            slice->setLabelVisible();
-            slice->setExploded();
-            slice->setExplodeDistanceFactor(0.5);
-        }
-    }
-    series->setPieSize(0.4);
-    chart->addSeries(series);
-
-    return chart;
-}
-
-QChart *ThemeWidget::createSplineChart() const
-{
-    QChart *chart = new QChart();
-    chart->setTitle("Spline chart");
-    QString name("Series ");
-    int nameIndex = 0;
-    for (const DataList &list : m_dataTable) {
-        for (const Data &data : list) {
-            splineSeries->append(data.first);
-//            qDebug() << data.first;
-        }
-        splineSeries->setName(name + QString::number(nameIndex));
-        nameIndex++;
-        chart->addSeries(splineSeries);
-    }
+    m_current_axis->setTickCount(20);
 
     chart->createDefaultAxes();
-    chart->axisX()->setRange(0, m_valueMax);
-    chart->axisY()->setRange(0, m_valueCount);
-    // Add space to label to add space between labels and axis
-    static_cast<QValueAxis *>(chart->axisY())->setLabelFormat("%.1f  ");
-
-    return chart;
-}
-
-QChart *ThemeWidget::createScatterChart() const
-{
-    // scatter chart
-    QChart *chart = new QChart();
-    chart->setTitle("Scatter chart");
-    QString name("Series ");
-    int nameIndex = 0;
-    for (const DataList &list : m_dataTable) {
-        QScatterSeries *series = new QScatterSeries(chart);
-        for (const Data &data : list)
-            series->append(data.first);
-        series->setName(name + QString::number(nameIndex));
-        nameIndex++;
-        chart->addSeries(series);
-    }
-
-    chart->createDefaultAxes();
-    chart->axisX()->setRange(0, m_valueMax);
-    chart->axisY()->setRange(0, m_valueCount);
+    chart->setAxisX(m_current_axis,currentSplineSeries);
+    chart->axisX()->setRange(0, m_currentValueCount);
+    chart->axisY()->setRange(0, m_currentValueMax);
     // Add space to label to add space between labels and axis
     static_cast<QValueAxis *>(chart->axisY())->setLabelFormat("%.1f  ");
 
@@ -408,27 +278,20 @@ void ThemeWidget::updateUI()
 void ThemeWidget::handleTimeout()
 {
     qDebug() << "updateChars";
-//    QChart *chart = new QChart();
-//    chart->setTitle("Spline chart");
-//    QString name("Series ");
-//    int nameIndex = 0;
-//    for (const DataList &list : m_dataTable) {
-//        QSplineSeries *series = new QSplineSeries(chart);
-//        for (const Data &data : list)
-//            series->append(data.first);
-//        series->setName(name + QString::number(nameIndex));
-//        nameIndex++;
-//        chart->addSeries(series);
-//    }
 
-//    chart->createDefaultAxes();
-//    chart->axisX()->setRange(0, m_valueMax);
-//    chart->axisY()->setRange(0, m_valueCount);
-//    // Add space to label to add space between labels and axis
-//    static_cast<QValueAxis *>(chart->axisY())->setLabelFormat("%.1f  ");
+    qreal x = speedSplineChart->plotArea().width()/m_speed_axis->tickCount();
+    qreal y = (m_speed_axis->max() - m_speed_axis->min())/m_speed_axis->tickCount();
 
-//    return chart;
-    splineSeries->append(10,20);
-    splineSeries->append(1,2);
-    splineSeries->append(5,8);
+    qDebug() << m_speed_axis->max() << m_speed_axis->min();
+    m_x += y;
+    m_y = QRandomGenerator::global()->bounded(8);
+    qDebug() << m_x << m_y;
+    speedSplineSeries->append(m_x, m_y);
+    speedSplineChart->scroll(x, 0);
+
+    positionSplineSeries->append(m_x, m_y);
+    positionSplineChart->scroll(x, 0);
+
+    currentSplineSeries->append(m_x, m_y);
+    currentSplineChart->scroll(x, 0);
 }
