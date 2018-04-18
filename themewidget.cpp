@@ -2,11 +2,8 @@
 #include "ui_themewidget.h"
 
 #include <QtCharts/QChartView>
-#include <QtCharts/QLegend>
 #include <QtWidgets/QGridLayout>
-#include <QtWidgets/QFormLayout>
 #include <QtWidgets/QComboBox>
-#include <QtWidgets/QSpinBox>
 #include <QtWidgets/QCheckBox>
 #include <QtWidgets/QGroupBox>
 #include <QtWidgets/QLabel>
@@ -58,6 +55,7 @@ ThemeWidget::ThemeWidget(QWidget *parent) :
 //    chartView = new QChartView(currentSplineChart);
 //    m_ui->chartsGridLayout->addWidget(chartView, 2, 1);
 //    m_charts << chartView;
+
     // Set defaults
     m_ui->antialiasCheckBox->setChecked(true);
 
@@ -82,14 +80,16 @@ ThemeWidget::~ThemeWidget()
 void ThemeWidget::initValues()
 {
     m_speedValueMax = 8;
-    m_positionValueMax = 8;
-    m_currentValueMax = 8;
+    m_positionValueMax = 20;
+    m_currentValueMax = 40;
 
     m_speedValueCount = 100;
     m_positionValueCount = 100;
     m_currentValueCount = 100;
 
-    m_x = 100;
+    m_speed_x = 100;
+    m_position_x = 100;
+    m_current_x = 100;
     m_y = 8;
 }
 
@@ -146,7 +146,7 @@ QChart *ThemeWidget::createSpeedSplineChart() const
     chart->setTitle("speed spline chart");
     chart->addSeries(speedSplineSeries);
 
-    m_speed_axis->setTickCount(5);
+    m_speed_axis->setTickCount(10);
 
     chart->createDefaultAxes();
     chart->setAxisX(m_speed_axis,speedSplineSeries);
@@ -277,21 +277,26 @@ void ThemeWidget::updateUI()
 
 void ThemeWidget::handleTimeout()
 {
-    qDebug() << "updateChars";
+    qreal x,y;
 
-    qreal x = speedSplineChart->plotArea().width()/m_speed_axis->tickCount();
-    qreal y = (m_speed_axis->max() - m_speed_axis->min())/m_speed_axis->tickCount();
-
-    qDebug() << m_speed_axis->max() << m_speed_axis->min();
-    m_x += y;
-    m_y = QRandomGenerator::global()->bounded(8);
-    qDebug() << m_x << m_y;
-    speedSplineSeries->append(m_x, m_y);
+    x = speedSplineChart->plotArea().width()/m_speed_axis->tickCount();
+    y = (m_speed_axis->max() - m_speed_axis->min())/m_speed_axis->tickCount();
+    m_speed_x += y;
+    m_y = QRandomGenerator::global()->bounded(m_speedValueMax);   //received speed value
+    speedSplineSeries->append(m_speed_x, m_y);
     speedSplineChart->scroll(x, 0);
 
-    positionSplineSeries->append(m_x, m_y);
+    x = positionSplineChart->plotArea().width()/m_position_axis->tickCount();
+    y = (m_position_axis->max() - m_position_axis->min())/m_position_axis->tickCount();
+    m_position_x += y;
+    m_y = QRandomGenerator::global()->bounded(m_positionValueMax);   //received position value
+    positionSplineSeries->append(m_position_x, m_y);
     positionSplineChart->scroll(x, 0);
 
-    currentSplineSeries->append(m_x, m_y);
+    x = currentSplineChart->plotArea().width()/m_current_axis->tickCount();
+    y = (m_current_axis->max() - m_current_axis->min())/m_current_axis->tickCount();
+    m_current_x += y;
+    m_y = QRandomGenerator::global()->bounded(m_currentValueMax);   //received current value
+    currentSplineSeries->append(m_current_x, m_y);
     currentSplineChart->scroll(x, 0);
 }

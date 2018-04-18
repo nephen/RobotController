@@ -77,7 +77,9 @@ private:
     QValueAxis *m_position_axis;
     QValueAxis *m_current_axis;
 
-    qreal m_x;
+    qreal m_speed_x;
+    qreal m_position_x;
+    qreal m_current_x;
     qreal m_y;
 };
 
