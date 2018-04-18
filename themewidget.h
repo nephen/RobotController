@@ -4,6 +4,8 @@
 #include <QGroupBox>
 #include <QtWidgets/QWidget>
 #include <QtCharts/QChartGlobal>
+#include <QTimer>
+#include <QtCharts/QSplineSeries>
 
 namespace Ui {
 class ThemeWidget;
@@ -36,12 +38,16 @@ public:
 private slots:
     void updateUI();
 
+public slots:
+    void handleTimeout();
+
 private:
     DataTable generateRandomData(int listCount, int valueMax, int valueCount) const;
     void populateThemeBox();
     void populateAnimationBox();
     void populateLegendBox();
-    void connectSignals();
+    void initBoxConnections();
+    void initChartTimer();
     QChart *createAreaChart() const;
     QChart *createBarChart(int valueCount) const;
     QChart *createPieChart() const;
@@ -56,6 +62,8 @@ private:
     QList<QChartView *> m_charts;
     DataTable m_dataTable;
     Ui::ThemeWidget *m_ui;
+    QTimer m_timer;
+    QSplineSeries *splineSeries;
 };
 
 #endif // THEMEWIDGET_H

@@ -73,7 +73,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_connectDialog = new ConnectDialog;
 
     initActionsConnections();
-    QTimer::singleShot(50, m_connectDialog, &ConnectDialog::show);
+//    QTimer::singleShot(50, m_connectDialog, &ConnectDialog::show);
 }
 
 MainWindow::~MainWindow()

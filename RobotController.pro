@@ -1,4 +1,4 @@
-QT += serialbus widgets charts
+QT += serialbus widgets charts core
 
 TARGET = RobotController
 TEMPLATE = app

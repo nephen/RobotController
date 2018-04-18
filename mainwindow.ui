@@ -26,19 +26,15 @@
          <attribute name="title">
           <string>Test</string>
          </attribute>
-         <widget class="ThemeWidget" name="chartsGroupBox">
-          <property name="geometry">
-           <rect>
-            <x>10</x>
-            <y>20</y>
-            <width>841</width>
-            <height>531</height>
-           </rect>
-          </property>
-          <property name="title">
-           <string>charts</string>
-          </property>
-         </widget>
+         <layout class="QVBoxLayout" name="verticalLayout">
+          <item>
+           <widget class="ThemeWidget" name="chartsGroupBox">
+            <property name="title">
+             <string>charts</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </widget>
         <widget class="QWidget" name="Terminal">
          <attribute name="title">
