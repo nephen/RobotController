@@ -157,6 +157,8 @@ QChart *ThemeWidget::createSpeedSplineChart() const
     chart->createDefaultAxes();
     chart->axisX()->setRange(0, m_speedValueCount);
     chart->axisY()->setRange(0, m_speedValueMax);
+    chart->axisX()->setTitleText("Time:s");
+    chart->axisY()->setTitleText("Speed:RPM");
     // Add space to label to add space between labels and axis
     static_cast<QValueAxis *>(chart->axisY())->setLabelFormat("%.1f  ");
 
@@ -173,6 +175,8 @@ QChart *ThemeWidget::createPositionSplineChart() const
     chart->createDefaultAxes();
     chart->axisX()->setRange(0, m_positionValueCount);
     chart->axisY()->setRange(0, m_positionValueMax);
+    chart->axisX()->setTitleText("Time:s");
+    chart->axisY()->setTitleText("Position:°");
     // Add space to label to add space between labels and axis
     static_cast<QValueAxis *>(chart->axisY())->setLabelFormat("%.1f  ");
 
@@ -189,6 +193,8 @@ QChart *ThemeWidget::createCurrentSplineChart() const
     chart->createDefaultAxes();
     chart->axisX()->setRange(0, m_currentValueCount);
     chart->axisY()->setRange(0, m_currentValueMax);
+    chart->axisX()->setTitleText("Time:s");
+    chart->axisY()->setTitleText("Current:A");
     // Add space to label to add space between labels and axis
     static_cast<QValueAxis *>(chart->axisY())->setLabelFormat("%.1f  ");
 
