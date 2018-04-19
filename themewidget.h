@@ -49,6 +49,7 @@ private:
     void initBoxConnections();
     void initChartTimer();
     void initValues();
+    void setAxis();
     QChart *createSpeedSplineChart() const;
     QChart *createPositionSplineChart() const;
     QChart *createCurrentSplineChart() const;
@@ -70,9 +71,13 @@ private:
     QChart *positionSplineChart;
     QChart *currentSplineChart;
 
+    //Including the raw data sent by the motor controller and the current target value
     QSplineSeries *speedSplineSeries;
+    QSplineSeries *speedTargetSplineSeries;
     QSplineSeries *positionSplineSeries;
+    QSplineSeries *positionTargetSplineSeries;
     QSplineSeries *currentSplineSeries;
+    QSplineSeries *currentTargetSplineSeries;
     QValueAxis *m_speed_axis;
     QValueAxis *m_position_axis;
     QValueAxis *m_current_axis;
@@ -80,7 +85,7 @@ private:
     qreal m_speed_x;
     qreal m_position_x;
     qreal m_current_x;
-    qreal m_y;
+    qreal m_received_value_y;
 };
 
 #endif // THEMEWIDGET_H
