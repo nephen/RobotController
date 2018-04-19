@@ -59,6 +59,7 @@ ThemeWidget::ThemeWidget(QWidget *parent) :
     // Set defaults
     m_ui->antialiasCheckBox->setChecked(true);
     m_ui->animatedComboBox->setCurrentIndex(2);
+    m_ui->themeComboBox->setCurrentIndex(2);
 
     // Set the colors from the light theme as default ones
     QPalette pal = qApp->palette();
@@ -219,7 +220,7 @@ void ThemeWidget::updateUI()
 
         // Set palette colors based on selected theme
         //![8]
-        QPalette pal = window()->palette();
+        QPalette pal = palette(); //If you want to change the color of the entire window, use window()->palette()
         if (theme == QChart::ChartThemeLight) {
             pal.setColor(QPalette::Window, QRgb(0xf0f0f0));
             pal.setColor(QPalette::WindowText, QRgb(0x404044));
@@ -246,7 +247,7 @@ void ThemeWidget::updateUI()
             pal.setColor(QPalette::Window, QRgb(0xf0f0f0));
             pal.setColor(QPalette::WindowText, QRgb(0x404044));
         }
-        window()->setPalette(pal);
+        setPalette(pal);
     }
 
     // Update antialiasing
