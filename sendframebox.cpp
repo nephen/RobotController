@@ -225,7 +225,7 @@ void SendFrameBox::sendLibFrameData()
     char szFrameID[9];
     unsigned char FrameID[4]={0,0,0,0};
     memset(szFrameID,'0',9);
-    unsigned char Data[8];
+    unsigned char Data[8]={0,0,0,0,0,0,0,0};
     char szData[25];
     BYTE datalen=0;
     QString sendInfo;
@@ -261,18 +261,20 @@ void SendFrameBox::sendLibFrameData()
     qDebug() << "FrameID Len" << m_ui->frameIdEdit->text().length();
     strToData((unsigned char*)szFrameID,FrameID,4,0);
 
-    qDebug() << "FrameID" << FrameID;
-
     datalen=(m_ui->payloadEdit->text().length()+1)/3;
+    qDebug() << "datalen" << datalen;
     strcpy(szData,m_ui->payloadEdit->text().toLatin1());
     strToData((unsigned char*)szData,Data,datalen,1);
+    qDebug() << "SzDATA" << szData;
+    qDebug() << "DATA" << Data[0] << Data[1] << Data[2] << Data[3];
 
     frameinfo.SendType = 0;
     frameinfo.DataLen=datalen;
     memcpy(&frameinfo.Data,Data,datalen);
+    qDebug() << "frameinfo.DATA" << frameinfo.Data[0] << frameinfo.Data[1] << frameinfo.Data[2] << frameinfo.Data[3];
 
-//    frameinfo.RemoteFlag=ui->frameTypeComboBox->currentText().toInt();
-//    frameinfo.ExternFlag=ui->frameFormatComboBox->currentText().toInt();
+    frameinfo.RemoteFlag=0;//ui->frameTypeComboBox->currentText().toInt();
+    frameinfo.ExternFlag=0;//ui->frameFormatComboBox->currentText().toInt();
     if(frameinfo.ExternFlag==1)
     {
         frameinfo.ID=((DWORD)FrameID[0]<<24)+((DWORD)FrameID[1]<<16)+((DWORD)FrameID[2]<<8)+
