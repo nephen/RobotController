@@ -50,6 +50,8 @@
 
 #include "sendframebox.h"
 #include "ui_sendframebox.h"
+#include "QDebug"
+#include "ECanVci.h"
 
 enum {
     MaxStandardId = 0x7FF,
@@ -126,6 +128,12 @@ void HexStringValidator::setMaxLength(int maxLength)
     m_maxLength = maxLength;
 }
 
+void SendFrameBox::updateConnectStatus(int connect, int dev_type)
+{
+    m_lib_connect_status = connect;
+    m_dev_type_status = dev_type;
+}
+
 SendFrameBox::SendFrameBox(QWidget *parent) :
     QGroupBox(parent),
     m_ui(new Ui::SendFrameBox)
@@ -169,9 +177,25 @@ SendFrameBox::SendFrameBox(QWidget *parent) :
 
     auto frameIdTextChanged = [this]() {
         const bool hasFrameId = !m_ui->frameIdEdit->text().isEmpty();
-        m_ui->sendButton->setEnabled(hasFrameId);
+        if(hasFrameId) {
+            if(m_lib_connect_status) {
+                m_ui->sendButton->setEnabled(false);
+                m_ui->libSendButton->setEnabled(true);
+            }
+            else
+            {
+                m_ui->sendButton->setEnabled(true);
+                m_ui->libSendButton->setEnabled(false);
+            }
+        }
+        else {
+            m_ui->sendButton->setEnabled(false);
+            m_ui->libSendButton->setEnabled(false);
+        }
         m_ui->sendButton->setToolTip(hasFrameId
                                      ? QString() : tr("Cannot send because no Frame ID was given."));
+        m_ui->libSendButton->setToolTip(hasFrameId
+                                        ? QString() : tr("Cannot send because no Frame ID was given."));
     };
     connect(m_ui->frameIdEdit, &QLineEdit::textChanged, frameIdTextChanged);
     frameIdTextChanged();
@@ -195,7 +219,148 @@ SendFrameBox::SendFrameBox(QWidget *parent) :
     });
 }
 
+void SendFrameBox::sendLibFrameData()
+{
+    CAN_OBJ frameinfo;
+    char szFrameID[9];
+    unsigned char FrameID[4]={0,0,0,0};
+    memset(szFrameID,'0',9);
+    unsigned char Data[8];
+    char szData[25];
+    BYTE datalen=0;
+    QString sendInfo;
+
+    qDebug() << "send lib frame data";
+
+    if(m_ui->frameIdEdit->text().length() == 0 ||
+            (m_ui->payloadEdit->text().length() == 0 && m_ui->dataFrame->isChecked()))
+    {
+        sendInfo.append("请输入数据");
+    }
+
+    if(m_ui->frameIdEdit->text().length() > 8)
+    {
+        sendInfo.append("ID值超过范围");
+    }
+
+    if(m_ui->payloadEdit->text().length() > 24)
+    {
+        sendInfo.append("数据长度超过范围,最大为8个字节");
+    }
+
+    if(m_ui->dataFrame->isChecked())
+    {
+        if(m_ui->frameIdEdit->text().length()%3 == 1)
+        {
+            sendInfo.append("数据格式不对,请重新输入");
+        }
+    }
+
+    memcpy(&szFrameID[8-(m_ui->frameIdEdit->text().length())],m_ui->frameIdEdit->text().toLatin1(),m_ui->frameIdEdit->text().length());
+
+    qDebug() << "FrameID Len" << m_ui->frameIdEdit->text().length();
+    strToData((unsigned char*)szFrameID,FrameID,4,0);
+
+    qDebug() << "FrameID" << FrameID;
+
+    datalen=(m_ui->payloadEdit->text().length()+1)/3;
+    strcpy(szData,m_ui->payloadEdit->text().toLatin1());
+    strToData((unsigned char*)szData,Data,datalen,1);
+
+    frameinfo.SendType = 0;
+    frameinfo.DataLen=datalen;
+    memcpy(&frameinfo.Data,Data,datalen);
+
+//    frameinfo.RemoteFlag=ui->frameTypeComboBox->currentText().toInt();
+//    frameinfo.ExternFlag=ui->frameFormatComboBox->currentText().toInt();
+    if(frameinfo.ExternFlag==1)
+    {
+        frameinfo.ID=((DWORD)FrameID[0]<<24)+((DWORD)FrameID[1]<<16)+((DWORD)FrameID[2]<<8)+
+                ((DWORD)FrameID[3]);
+    }
+    else
+    {
+        frameinfo.ID=((DWORD)FrameID[2]<<8)+((DWORD)FrameID[3]);
+    }
+
+    qDebug() << "ID is :" << frameinfo.ID;
+
+    if(Transmit(m_dev_type_status,0,0,&frameinfo,1)==1)
+    {
+        sendInfo.append("写入成功");
+    }
+    else
+    {
+        sendInfo.append("写入失败");
+    }
+    qDebug() << sendInfo;
+    emit showSendInfo(sendInfo);
+}
+
+//-----------------------------------------------------
+//参数：
+//str：要转换的字符串
+//data：储存转换过来的数据串
+//len:数据长度
+//函数功能：字符串转换为数据串
+//-----------------------------------------------------
+int SendFrameBox::strToData(unsigned char *str, unsigned char *data,int len,int flag)
+{
+    unsigned char cTmp=0;
+    int i=0;
+    for(int j=0;j<len;j++)
+    {
+        if(charToInt(str[i++],&cTmp))
+            return 1;
+        data[j]=cTmp;
+        if(charToInt(str[i++],&cTmp))
+            return 1;
+        data[j]=(data[j]<<4)+cTmp;
+        if(flag==1)
+            i++;
+    }
+    return 0;
+}
+
+//-----------------------------------------------------
+//参数：
+//chr：要转换的字符
+//cint：储存转换过来的数据
+//函数功能：字符转换为数据
+//-----------------------------------------------------
+int SendFrameBox::charToInt(unsigned char chr, unsigned char *cint)
+{
+    unsigned char cTmp;
+    cTmp=chr-48;
+    if(cTmp>=0&&cTmp<=9)
+    {
+        *cint=cTmp;
+        return 0;
+    }
+    cTmp=chr-65;
+    if(cTmp>=0&&cTmp<=5)
+    {
+        *cint=(cTmp+10);
+        return 0;
+    }
+    cTmp=chr-97;
+    if(cTmp>=0&&cTmp<=5)
+    {
+        *cint=(cTmp+10);
+        return 0;
+    }
+    return 1;
+}
+
 SendFrameBox::~SendFrameBox()
 {
     delete m_ui;
+}
+
+void SendFrameBox::on_libSendButton_clicked()
+{
+    if(m_lib_connect_status)
+    {
+        sendLibFrameData();
+    }
 }

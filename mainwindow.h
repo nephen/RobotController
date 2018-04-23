@@ -76,6 +76,9 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    int m_lib_connect;
+    int m_devtype;
+
 private slots:
     void processReceivedFrames();
     void sendFrame(const QCanBusFrame &frame) const;
@@ -83,18 +86,24 @@ private slots:
     void connectDevice();
     void disconnectDevice();
     void processFramesWritten(qint64);
+    void showSendInfo(QString s);
+
+signals:
+    void updateConnectStatus(int, int);
 
 protected:
     void closeEvent(QCloseEvent *event) override;
 
 private:
     void initActionsConnections();
+    void connectDeviceByLib();
+    void showInfo(QString s);
 
     qint64 m_numberFramesWritten = 0;
     Ui::MainWindow *m_ui = nullptr;
     QLabel *m_status = nullptr;
     QLabel *m_written = nullptr;
-    ConnectDialog *m_connectDialog = nullptr;
+    ConnectDialog *m_lib_connectDialog = nullptr;
     QCanBusDevice *m_canDevice = nullptr;
 };
 

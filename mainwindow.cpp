@@ -57,9 +57,13 @@
 #include <QCloseEvent>
 #include <QDesktopServices>
 #include <QTimer>
+#include "ECanVci.h"
+#include "QThread"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
+    m_lib_connect(0),
+    m_devtype(USBCAN1),
     m_ui(new Ui::MainWindow)
 {
     m_ui->setupUi(this);
@@ -70,17 +74,19 @@ MainWindow::MainWindow(QWidget *parent) :
     m_written = new QLabel;
     m_ui->statusBar->addWidget(m_written);
 
-    m_connectDialog = new ConnectDialog;
+    m_lib_connectDialog = new ConnectDialog;
 
     initActionsConnections();
-//    QTimer::singleShot(50, m_connectDialog, &ConnectDialog::show);
+//    QTimer::singleShot(50, m_lib_connectDialog, &ConnectDialog::show);
 }
 
 MainWindow::~MainWindow()
 {
+    disconnectDevice(); //Automatically close the connection when closing the window
+
     delete m_canDevice;
 
-    delete m_connectDialog;
+    delete m_lib_connectDialog;
     delete m_ui;
 }
 
@@ -90,8 +96,9 @@ void MainWindow::initActionsConnections()
     m_ui->sendFrameBox->setEnabled(false);
 
     connect(m_ui->sendFrameBox, &SendFrameBox::sendFrame, this, &MainWindow::sendFrame);
-    connect(m_ui->actionConnect, &QAction::triggered, m_connectDialog, &ConnectDialog::show);
-    connect(m_connectDialog, &QDialog::accepted, this, &MainWindow::connectDevice);
+    connect(m_ui->sendFrameBox, &SendFrameBox::showSendInfo, this, &MainWindow::showSendInfo);
+    connect(m_ui->actionConnect, &QAction::triggered, m_lib_connectDialog, &ConnectDialog::show);
+    connect(m_lib_connectDialog, &QDialog::accepted, this, &MainWindow::connectDevice);
     connect(m_ui->actionDisconnect, &QAction::triggered, this, &MainWindow::disconnectDevice);
     connect(m_ui->actionQuit, &QAction::triggered, this, &QWidget::close);
     connect(m_ui->actionAboutQt, &QAction::triggered, qApp, &QApplication::aboutQt);
@@ -99,6 +106,7 @@ void MainWindow::initActionsConnections()
     connect(m_ui->actionPluginDocumentation, &QAction::triggered, this, []() {
         QDesktopServices::openUrl(QUrl("http://doc.qt.io/qt-5/qtcanbus-backends.html#can-bus-plugins"));
     });
+    connect(this, &updateConnectStatus, m_ui->sendFrameBox, &SendFrameBox::updateConnectStatus);
 }
 
 void MainWindow::processErrors(QCanBusDevice::CanBusError error) const
@@ -116,16 +124,129 @@ void MainWindow::processErrors(QCanBusDevice::CanBusError error) const
     }
 }
 
+void MainWindow::connectDeviceByLib()
+{
+    INIT_CONFIG init_config;
+    int baud;
+
+    baud = m_lib_connectDialog->settings().baute;
+    init_config.AccCode = 0;
+    init_config.AccMask =0xffffff;
+    init_config.Filter = 0;
+
+    switch (baud)
+    {
+    case 0: //1000
+
+        init_config.Timing0 = 0;
+        init_config.Timing1 =0x14;
+        break;
+    case 1: //800
+
+        init_config.Timing0 = 0;
+        init_config.Timing1 = 0x16;
+        break;
+    case 2: //666
+
+        init_config.Timing0 = 0x80;
+        init_config.Timing1 = 0xb6;
+        break;
+    case 3: //500
+
+        init_config.Timing0 = 0;
+        init_config.Timing1 = 0x1c;
+        break;
+    case 4://400
+
+        init_config.Timing0 = 0x80;
+        init_config.Timing1 = 0xfa;
+        break;
+    case 5://250
+
+        init_config.Timing0 = 0x01;
+        init_config.Timing1 = 0x1c;
+        break;
+    case 6://200
+
+        init_config.Timing0 = 0x81;
+        init_config.Timing1 = 0xfa;
+        break;
+    case 7://125
+
+        init_config.Timing0 = 0x03;
+        init_config.Timing1 = 0x1c;
+        break;
+    case 8://100
+
+        init_config.Timing0 = 0x04;
+        init_config.Timing1 = 0x1c;
+        break;
+    case 9://80
+
+        init_config.Timing0 = 0x83;
+        init_config.Timing1 = 0xff;
+        break;
+    case 10://50
+
+        init_config.Timing0 = 0x09;
+        init_config.Timing1 = 0x1c;
+        break;
+
+    }
+
+    init_config.Mode = 2;
+
+    if(OpenDevice(m_devtype,0,0)!=STATUS_OK)
+    {
+        showInfo("Open device fault!");
+        return;
+    }
+
+    showInfo("Open device Success!");
+
+    if(InitCAN(m_devtype,0,0,&init_config)!=STATUS_OK)
+    {
+        showInfo("Init can fault!");
+        CloseDevice(m_devtype,0);
+        return;
+    }
+
+    showInfo("Init Success!");
+
+    m_lib_connect=1;
+
+    m_ui->actionConnect->setEnabled(false);
+    m_ui->actionDisconnect->setEnabled(true);
+
+    m_ui->sendFrameBox->setEnabled(true);
+
+    if(m_lib_connect==0)
+    {
+        showInfo("Not open device!");
+        return;
+    }
+    if(StartCAN(m_devtype,0,0)==1)
+    {
+        showInfo("Start Success!");
+    }
+    else
+    {
+        showInfo("Start Fault!");
+    }
+}
+
 void MainWindow::connectDevice()
 {
-    const ConnectDialog::Settings p = m_connectDialog->settings();
+    const ConnectDialog::Settings p = m_lib_connectDialog->settings();
 
     QString errorString;
     m_canDevice = QCanBus::instance()->createDevice(p.pluginName, p.deviceInterfaceName,
                                                     &errorString);
     if (!m_canDevice) {
-        m_status->setText(tr("Error creating device '%1', reason: '%2'")
+        m_status->setText(tr("Use lib instead for Error creating device '%1', reason: '%2'")
                           .arg(p.pluginName).arg(errorString));
+        connectDeviceByLib(); //Use libraries instead of plugins
+        emit updateConnectStatus(m_lib_connect, m_devtype);
         return;
     }
 
@@ -165,6 +286,24 @@ void MainWindow::connectDevice()
 
 void MainWindow::disconnectDevice()
 {
+    if(m_lib_connect==1)
+    {
+        m_lib_connect=0;
+        QThread::msleep(200);
+        CloseDevice(m_devtype,0);
+
+        m_ui->actionConnect->setEnabled(true);
+        m_ui->actionDisconnect->setEnabled(false);
+
+        m_ui->sendFrameBox->setEnabled(false);
+
+        m_status->setText(tr("Disconnected"));
+
+        emit updateConnectStatus(m_lib_connect, m_devtype);
+
+        return;
+    }
+
     if (!m_canDevice)
         return;
 
@@ -188,7 +327,7 @@ void MainWindow::processFramesWritten(qint64 count)
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    m_connectDialog->close();
+    m_lib_connectDialog->close();
     event->accept();
 }
 
@@ -236,4 +375,14 @@ void MainWindow::sendFrame(const QCanBusFrame &frame) const
         return;
 
     m_canDevice->writeFrame(frame);
+}
+
+void MainWindow::showInfo(QString s)
+{
+    m_ui->receivedMessagesEdit->append(s);
+}
+
+void MainWindow::showSendInfo(QString s)
+{
+    m_ui->receivedMessagesEdit->append(s);
 }

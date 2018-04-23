@@ -16,7 +16,8 @@ HEADERS += \
     connectdialog.h \
     mainwindow.h \
     sendframebox.h \
-    themewidget.h
+    themewidget.h \
+    ECanVci.h
 
 FORMS   += mainwindow.ui \
     connectdialog.ui \
@@ -28,3 +29,8 @@ RESOURCES += \
 
 target.path = ../
 INSTALLS += target
+
+unix|win32: LIBS += -L$$PWD/./ -lECanVci
+
+INCLUDEPATH += $$PWD/.
+DEPENDPATH += $$PWD/.

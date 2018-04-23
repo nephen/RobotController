@@ -74,6 +74,7 @@ public:
     struct Settings {
         QString pluginName;
         QString deviceInterfaceName;
+        int baute;
         QList<ConfigurationItem> configurations;
         bool useConfigurationEnabled = false;
     };

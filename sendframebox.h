@@ -101,12 +101,25 @@ public:
 
 signals:
     void sendFrame(const QCanBusFrame &frame);
+    void showSendInfo(QString s);
+
+public slots:
+    void updateConnectStatus(int connect, int dev_type);
+
+private slots:
+    void on_libSendButton_clicked();
 
 private:
     Ui::SendFrameBox *m_ui = nullptr;
 
     HexIntegerValidator *m_hexIntegerValidator = nullptr;
     HexStringValidator *m_hexStringValidator = nullptr;
+    int m_lib_connect_status;
+    int m_dev_type_status;
+
+    void sendLibFrameData();
+    int strToData(unsigned char *str, unsigned char *data,int len,int flag);
+    int charToInt(unsigned char chr, unsigned char *cint);
 };
 
 #endif // SENDFRAMEBOX_H

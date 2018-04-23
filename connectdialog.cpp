@@ -184,6 +184,7 @@ void ConnectDialog::updateSettings()
     m_currentSettings.pluginName = m_ui->pluginListBox->currentText();
     m_currentSettings.deviceInterfaceName = m_ui->interfaceListBox->currentText();
     m_currentSettings.useConfigurationEnabled = m_ui->useConfigurationBox->isChecked();
+    m_currentSettings.baute = m_ui->bauteComboBox->currentText().toInt();
 
     if (m_currentSettings.useConfigurationEnabled) {
         m_currentSettings.configurations.clear();
