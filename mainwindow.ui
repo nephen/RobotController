@@ -20,7 +20,7 @@
       <item>
        <widget class="QTabWidget" name="Control">
         <property name="currentIndex">
-         <number>2</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="View">
          <attribute name="title">
@@ -59,7 +59,23 @@
                   </widget>
                  </item>
                  <item>
-                  <widget class="QComboBox" name="comboBox"/>
+                  <widget class="QComboBox" name="comboBox">
+                   <item>
+                    <property name="text">
+                     <string>Speed</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Current</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Position</string>
+                    </property>
+                   </item>
+                  </widget>
                  </item>
                  <item>
                   <spacer name="horizontalSpacer">

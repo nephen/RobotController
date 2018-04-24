@@ -1,7 +1,6 @@
 #include "themewidget.h"
 #include "ui_themewidget.h"
 
-#include <QtCharts/QChartView>
 #include <QtWidgets/QGridLayout>
 #include <QtWidgets/QComboBox>
 #include <QtWidgets/QCheckBox>
@@ -37,20 +36,20 @@ ThemeWidget::ThemeWidget(QWidget *parent) :
 
     //create charts
 
-    QChartView *chartView;
+    ChartView *chartView;
 
     speedSplineChart = createSpeedSplineChart();
-    chartView = new QChartView(speedSplineChart);
+    chartView = new ChartView(speedSplineChart);
     m_ui->chartsGridLayout->addWidget(chartView, 1, 0);
     m_charts << chartView;
 
     positionSplineChart = createPositionSplineChart();
-    chartView = new QChartView(positionSplineChart);
+    chartView = new ChartView(positionSplineChart);
     m_ui->chartsGridLayout->addWidget(chartView, 1, 1);
     m_charts << chartView;
 
     currentSplineChart = createCurrentSplineChart();
-    chartView = new QChartView(currentSplineChart);
+    chartView = new ChartView(currentSplineChart);
     m_ui->chartsGridLayout->addWidget(chartView, 2, 0, 1, 2);
     m_charts << chartView;
 
@@ -218,7 +217,7 @@ void ThemeWidget::updateUI()
     //![6]
     const auto charts = m_charts;
     if (!m_charts.isEmpty() && m_charts.at(0)->chart()->theme() != theme) {
-        for (QChartView *chartView : charts) {
+        for (ChartView *chartView : charts) {
             //![7]
             chartView->chart()->setTheme(theme);
             //![7]
@@ -259,7 +258,7 @@ void ThemeWidget::updateUI()
     // Update antialiasing
     //![11]
     bool checked = m_ui->antialiasCheckBox->isChecked();
-    for (QChartView *chart : charts)
+    for (ChartView *chart : charts)
         chart->setRenderHint(QPainter::Antialiasing, checked);
     //![11]
 
@@ -268,7 +267,7 @@ void ThemeWidget::updateUI()
     QChart::AnimationOptions options(
                 m_ui->animatedComboBox->itemData(m_ui->animatedComboBox->currentIndex()).toInt());
     if (!m_charts.isEmpty() && m_charts.at(0)->chart()->animationOptions() != options) {
-        for (QChartView *chartView : charts)
+        for (ChartView *chartView : charts)
             chartView->chart()->setAnimationOptions(options);
     }
     //![9]
@@ -279,10 +278,10 @@ void ThemeWidget::updateUI()
                 m_ui->legendComboBox->itemData(m_ui->legendComboBox->currentIndex()).toInt());
 
     if (!alignment) {
-        for (QChartView *chartView : charts)
+        for (ChartView *chartView : charts)
             chartView->chart()->legend()->hide();
     } else {
-        for (QChartView *chartView : charts) {
+        for (ChartView *chartView : charts) {
             chartView->chart()->legend()->setAlignment(alignment);
             chartView->chart()->legend()->show();
         }
@@ -296,6 +295,7 @@ void ThemeWidget::handleTimeout()
 
     x = speedSplineChart->plotArea().width()/m_speed_axis->tickCount();
     y = m_speedValueCount/m_speed_axis->tickCount();
+//    qDebug() << m_speed_axis->max() << m_speed_axis->min();
     m_speed_x += y;
     m_received_value_y = QRandomGenerator::global()->bounded(m_speedValueMax);   //received speed value
     speedSplineSeries->append(m_speed_x, m_received_value_y);
@@ -303,7 +303,7 @@ void ThemeWidget::handleTimeout()
     speedSplineChart->scroll(x, 0);
 
     x = positionSplineChart->plotArea().width()/m_position_axis->tickCount();
-    y = m_speedValueCount/m_position_axis->tickCount();
+    y = m_positionValueCount/m_position_axis->tickCount();
     m_position_x += y;
     m_received_value_y = QRandomGenerator::global()->bounded(m_positionValueMax);   //received position value
     positionSplineSeries->append(m_position_x, m_received_value_y);
@@ -311,7 +311,7 @@ void ThemeWidget::handleTimeout()
     positionSplineChart->scroll(x, 0);
 
     x = currentSplineChart->plotArea().width()/m_current_axis->tickCount();
-    y = m_speedValueCount/m_current_axis->tickCount();
+    y = m_currentValueCount/m_current_axis->tickCount();
     m_current_x += y;
     m_received_value_y = QRandomGenerator::global()->bounded(m_currentValueMax);   //received current value
     currentSplineSeries->append(m_current_x, m_received_value_y);

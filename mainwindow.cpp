@@ -218,6 +218,7 @@ void MainWindow::connectDeviceByLib()
     showInfo("Init Success!");
 
     m_lib_connect=1;
+    m_status->setText(tr("Connected"));
 
     m_ui->actionConnect->setEnabled(false);
     m_ui->actionDisconnect->setEnabled(true);

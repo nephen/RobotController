@@ -7,6 +7,7 @@
 #include <QTimer>
 #include <QtCharts/QSplineSeries>
 #include <QtCharts/QValueAxis>
+#include "chartview.h"
 
 namespace Ui {
 class ThemeWidget;
@@ -18,7 +19,6 @@ class QCheckBox;
 QT_END_NAMESPACE
 
 QT_CHARTS_BEGIN_NAMESPACE
-class QChartView;
 class QChart;
 QT_CHARTS_END_NAMESPACE
 
@@ -63,7 +63,7 @@ private:
     int m_positionValueCount;
     int m_currentValueCount;
 
-    QList<QChartView *> m_charts;
+    QList<ChartView *> m_charts;
     Ui::ThemeWidget *m_ui;
     QTimer m_timer;
 

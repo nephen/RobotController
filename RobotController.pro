@@ -9,7 +9,8 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     sendframebox.cpp \
-    themewidget.cpp
+    themewidget.cpp \
+    chartview.cpp
 
 HEADERS += \
     bitratebox.h \
@@ -17,7 +18,8 @@ HEADERS += \
     mainwindow.h \
     sendframebox.h \
     themewidget.h \
-    ECanVci.h
+    ECanVci.h \
+    chartview.h
 
 FORMS   += mainwindow.ui \
     connectdialog.ui \
