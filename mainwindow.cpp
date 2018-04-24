@@ -111,6 +111,12 @@ void MainWindow::initActionsConnections()
         QDesktopServices::openUrl(QUrl("http://doc.qt.io/qt-5/qtcanbus-backends.html#can-bus-plugins"));
     });
     connect(this, &updateConnectStatus, m_ui->sendFrameBox, &SendFrameBox::updateConnectStatus);
+
+    //control part
+//    connect(m_ui->speedKiLineEdit, SIGNAL(valueChanged(int)), m_ui->speedKiSlider, SLOT(setValue(int)));
+//    connect(m_ui->speedKpLineEdit, SIGNAL(valueChanged(int)), m_ui->speedKpSlider, SLOT(setValue(int)));
+//    connect(m_ui->speedKiSlider, SIGNAL(valueChanged(int)), m_ui->speedKiLineEdit, SLOT(setValue(int)));
+//    connect(m_ui->speedKpSlider, SIGNAL(valueChanged(int)), m_ui->speedKpLineEdit, SLOT(setValue(int)));
 }
 
 void MainWindow::processErrors(QCanBusDevice::CanBusError error) const
@@ -128,7 +134,7 @@ void MainWindow::processErrors(QCanBusDevice::CanBusError error) const
     }
 }
 
-void MainWindow::connectDeviceByLib()
+void MainWindow::connectDeviceByLib() //Refer to the manufacturer's sample code programming
 {
     INIT_CONFIG init_config;
     int baud;
