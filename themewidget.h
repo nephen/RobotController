@@ -7,6 +7,8 @@
 #include <QTimer>
 #include <QtCharts/QSplineSeries>
 #include <QtCharts/QValueAxis>
+#include <QtWidgets/QHBoxLayout>
+#include <QtWidgets/QDoubleSpinBox>
 #include "chartview.h"
 
 namespace Ui {
@@ -50,6 +52,8 @@ private:
     void initChartTimer();
     void initValues();
     void setAxis();
+    void createTargetLayout();
+    void createChartsLayout();
     QChart *createSpeedSplineChart() const;
     QChart *createPositionSplineChart() const;
     QChart *createCurrentSplineChart() const;
@@ -86,6 +90,14 @@ private:
     qreal m_position_x;
     qreal m_current_x;
     qreal m_received_value_y;
+
+    QHBoxLayout * speedTargetLayout;
+    QHBoxLayout * positionTargetLayout;
+    QHBoxLayout * currentTargetLayout;
+
+    QDoubleSpinBox * speedTargetValueDoubleSpinBox;
+    QDoubleSpinBox * positionTargetValueDoubleSpinBox;
+    QDoubleSpinBox * currentTargetValueDoubleSpinBox;
 };
 
 #endif // THEMEWIDGET_H

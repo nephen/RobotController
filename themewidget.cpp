@@ -25,7 +25,10 @@ ThemeWidget::ThemeWidget(QWidget *parent) :
     currentTargetSplineSeries(new QSplineSeries),
     m_speed_axis(new QValueAxis),
     m_position_axis(new QValueAxis),
-    m_current_axis(new QValueAxis)
+    m_current_axis(new QValueAxis),
+    speedTargetLayout(new QHBoxLayout),
+    positionTargetLayout(new QHBoxLayout),
+    currentTargetLayout(new QHBoxLayout)
 {
     m_ui->setupUi(this);
 
@@ -34,24 +37,9 @@ ThemeWidget::ThemeWidget(QWidget *parent) :
     populateAnimationBox();
     populateLegendBox();
 
-    //create charts
+    createTargetLayout();
 
-    ChartView *chartView;
-
-    speedSplineChart = createSpeedSplineChart();
-    chartView = new ChartView(speedSplineChart);
-    m_ui->chartsGridLayout->addWidget(chartView, 1, 0);
-    m_charts << chartView;
-
-    positionSplineChart = createPositionSplineChart();
-    chartView = new ChartView(positionSplineChart);
-    m_ui->chartsGridLayout->addWidget(chartView, 1, 1);
-    m_charts << chartView;
-
-    currentSplineChart = createCurrentSplineChart();
-    chartView = new ChartView(currentSplineChart);
-    m_ui->chartsGridLayout->addWidget(chartView, 2, 0, 1, 2);
-    m_charts << chartView;
+    createChartsLayout();
 
     setAxis();
 
@@ -76,6 +64,54 @@ ThemeWidget::ThemeWidget(QWidget *parent) :
 ThemeWidget::~ThemeWidget()
 {
     delete m_ui;
+}
+
+void ThemeWidget::createChartsLayout()
+{
+    //create charts
+    ChartView *chartView;
+
+    speedSplineChart = createSpeedSplineChart();
+    chartView = new ChartView(speedSplineChart);
+    m_ui->chartsGridLayout->addWidget(chartView, 1, 0);
+    m_charts << chartView;
+
+    positionSplineChart = createPositionSplineChart();
+    chartView = new ChartView(positionSplineChart);
+    m_ui->chartsGridLayout->addWidget(chartView, 1, 1);
+    m_charts << chartView;
+
+    m_ui->chartsGridLayout->addLayout(speedTargetLayout, 2, 0);
+    m_ui->chartsGridLayout->addLayout(positionTargetLayout, 2, 1);
+
+    currentSplineChart = createCurrentSplineChart();
+    chartView = new ChartView(currentSplineChart);
+    m_ui->chartsGridLayout->addWidget(chartView, 3, 0, 1, 2);
+    m_charts << chartView;
+
+    m_ui->chartsGridLayout->addLayout(currentTargetLayout, 4, 0, 1, 2);
+}
+
+void ThemeWidget::createTargetLayout()
+{
+    speedTargetValueDoubleSpinBox = new QDoubleSpinBox();
+    QLabel *speedTargetValueLabel = new QLabel(tr("speed target:"));
+
+    positionTargetValueDoubleSpinBox = new QDoubleSpinBox();
+    QLabel *positionTargetValueLabel = new QLabel(tr("position target:"));
+
+    currentTargetValueDoubleSpinBox = new QDoubleSpinBox();
+    QLabel *currentTargetValueLabel = new QLabel(tr("current target:"));
+
+    speedTargetLayout->addWidget(speedTargetValueLabel);
+    speedTargetLayout->addWidget(speedTargetValueDoubleSpinBox);
+    speedTargetLayout->addStretch(20);
+    positionTargetLayout->addWidget(positionTargetValueLabel);
+    positionTargetLayout->addWidget(positionTargetValueDoubleSpinBox);
+    positionTargetLayout->addStretch(20);
+    currentTargetLayout->addWidget(currentTargetValueLabel);
+    currentTargetLayout->addWidget(currentTargetValueDoubleSpinBox);
+    currentTargetLayout->addStretch(20);
 }
 
 void ThemeWidget::initValues()
@@ -158,6 +194,8 @@ QChart *ThemeWidget::createSpeedSplineChart() const
     chart->axisY()->setRange(0, m_speedValueMax);
     chart->axisX()->setTitleText("Time:s");
     chart->axisY()->setTitleText("Speed:RPM");
+//    QValueAxis * test = qobject_cast<QValueAxis *>(speedTargetSplineSeries->attachedAxes());
+//    qDebug() << test->max();
     // Add space to label to add space between labels and axis
     static_cast<QValueAxis *>(chart->axisY())->setLabelFormat("%.1f  ");
 
@@ -299,7 +337,7 @@ void ThemeWidget::handleTimeout()
     m_speed_x += y;
     m_received_value_y = QRandomGenerator::global()->bounded(m_speedValueMax);   //received speed value
     speedSplineSeries->append(m_speed_x, m_received_value_y);
-    speedTargetSplineSeries->append(m_speed_x, m_speedValueMax/2);
+    speedTargetSplineSeries->append(m_speed_x, speedTargetValueDoubleSpinBox->value());
     speedSplineChart->scroll(x, 0);
 
     x = positionSplineChart->plotArea().width()/m_position_axis->tickCount();
@@ -307,7 +345,7 @@ void ThemeWidget::handleTimeout()
     m_position_x += y;
     m_received_value_y = QRandomGenerator::global()->bounded(m_positionValueMax);   //received position value
     positionSplineSeries->append(m_position_x, m_received_value_y);
-    positionTargetSplineSeries->append(m_position_x, m_positionValueMax/4);
+    positionTargetSplineSeries->append(m_position_x, positionTargetValueDoubleSpinBox->value());
     positionSplineChart->scroll(x, 0);
 
     x = currentSplineChart->plotArea().width()/m_current_axis->tickCount();
@@ -315,6 +353,6 @@ void ThemeWidget::handleTimeout()
     m_current_x += y;
     m_received_value_y = QRandomGenerator::global()->bounded(m_currentValueMax);   //received current value
     currentSplineSeries->append(m_current_x, m_received_value_y);
-    currentTargetSplineSeries->append(m_current_x, m_currentValueMax/3);
+    currentTargetSplineSeries->append(m_current_x, currentTargetValueDoubleSpinBox->value());
     currentSplineChart->scroll(x, 0);
 }
