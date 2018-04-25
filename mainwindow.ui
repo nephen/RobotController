@@ -121,7 +121,7 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QSpinBox" name="spinBox_3"/>
+                   <widget class="QDoubleSpinBox" name="doubleSpinBox_5"/>
                   </item>
                   <item>
                    <spacer name="horizontalSpacer_2">
@@ -187,10 +187,10 @@
                       </widget>
                      </item>
                      <item>
-                      <widget class="QLineEdit" name="lineEdit"/>
+                      <widget class="QDoubleSpinBox" name="currentIqKpDoubleSpinBox"/>
                      </item>
                      <item>
-                      <widget class="QSlider" name="horizontalSlider">
+                      <widget class="DoubleSlider" name="currentIqKpSlider">
                        <property name="orientation">
                         <enum>Qt::Horizontal</enum>
                        </property>
@@ -208,10 +208,10 @@
                       </widget>
                      </item>
                      <item>
-                      <widget class="QLineEdit" name="lineEdit_2"/>
+                      <widget class="QDoubleSpinBox" name="currentIqKiDoubleSpinBox"/>
                      </item>
                      <item>
-                      <widget class="QSlider" name="horizontalSlider_2">
+                      <widget class="DoubleSlider" name="currentIqKiSlider">
                        <property name="orientation">
                         <enum>Qt::Horizontal</enum>
                        </property>
@@ -238,10 +238,10 @@
                       </widget>
                      </item>
                      <item>
-                      <widget class="QLineEdit" name="lineEdit_3"/>
+                      <widget class="QDoubleSpinBox" name="currentIdKpDoubleSpinBox"/>
                      </item>
                      <item>
-                      <widget class="QSlider" name="horizontalSlider_3">
+                      <widget class="DoubleSlider" name="currentIdKpSlider">
                        <property name="orientation">
                         <enum>Qt::Horizontal</enum>
                        </property>
@@ -259,10 +259,10 @@
                       </widget>
                      </item>
                      <item>
-                      <widget class="QLineEdit" name="lineEdit_4"/>
+                      <widget class="QDoubleSpinBox" name="currentIdKiDoubleSpinBox"/>
                      </item>
                      <item>
-                      <widget class="QSlider" name="horizontalSlider_4">
+                      <widget class="DoubleSlider" name="currentIdKiSlider">
                        <property name="orientation">
                         <enum>Qt::Horizontal</enum>
                        </property>
@@ -332,7 +332,7 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QSpinBox" name="spinBox"/>
+                   <widget class="QDoubleSpinBox" name="doubleSpinBox_6"/>
                   </item>
                   <item>
                    <spacer name="horizontalSpacer_4">
@@ -396,10 +396,10 @@
                        </widget>
                       </item>
                       <item>
-                       <widget class="QLineEdit" name="speedKpLineEdit"/>
+                       <widget class="QDoubleSpinBox" name="speedKpDoubleSpinBox"/>
                       </item>
                       <item>
-                       <widget class="QSlider" name="speedKpSlider">
+                       <widget class="DoubleSlider" name="speedKpSlider">
                         <property name="orientation">
                          <enum>Qt::Horizontal</enum>
                         </property>
@@ -417,10 +417,10 @@
                        </widget>
                       </item>
                       <item>
-                       <widget class="QLineEdit" name="speedKiLineEdit"/>
+                       <widget class="QDoubleSpinBox" name="speedKiDoubleSpinBox"/>
                       </item>
                       <item>
-                       <widget class="QSlider" name="speedKiSlider">
+                       <widget class="DoubleSlider" name="speedKiSlider">
                         <property name="orientation">
                          <enum>Qt::Horizontal</enum>
                         </property>
@@ -491,7 +491,7 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QSpinBox" name="spinBox_2"/>
+                   <widget class="QDoubleSpinBox" name="doubleSpinBox_7"/>
                   </item>
                   <item>
                    <spacer name="horizontalSpacer_7">
@@ -551,10 +551,10 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QLineEdit" name="lineEdit_5"/>
+                   <widget class="QDoubleSpinBox" name="positionKpDoubleSpinBox"/>
                   </item>
                   <item>
-                   <widget class="QSlider" name="horizontalSlider_7">
+                   <widget class="DoubleSlider" name="positionKpSlider">
                     <property name="orientation">
                      <enum>Qt::Horizontal</enum>
                     </property>
@@ -572,10 +572,10 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QLineEdit" name="lineEdit_8"/>
+                   <widget class="QDoubleSpinBox" name="positionKiDoubleSpinBox"/>
                   </item>
                   <item>
-                   <widget class="QSlider" name="horizontalSlider_8">
+                   <widget class="DoubleSlider" name="positionKiSlider">
                     <property name="orientation">
                      <enum>Qt::Horizontal</enum>
                     </property>
@@ -815,6 +815,11 @@
    <extends>QGroupBox</extends>
    <header>themewidget.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>DoubleSlider</class>
+   <extends>QSlider</extends>
+   <header>doubleslider.h</header>
   </customwidget>
  </customwidgets>
  <resources>

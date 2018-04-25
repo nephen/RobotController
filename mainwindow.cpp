@@ -57,8 +57,9 @@
 #include <QCloseEvent>
 #include <QDesktopServices>
 #include <QTimer>
+#include <QThread>
 #include "ECanVci.h"
-#include "QThread"
+#include "doubleslider.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -113,10 +114,25 @@ void MainWindow::initActionsConnections()
     connect(this, &updateConnectStatus, m_ui->sendFrameBox, &SendFrameBox::updateConnectStatus);
 
     //control part
-//    connect(m_ui->speedKiLineEdit, SIGNAL(valueChanged(int)), m_ui->speedKiSlider, SLOT(setValue(int)));
-//    connect(m_ui->speedKpLineEdit, SIGNAL(valueChanged(int)), m_ui->speedKpSlider, SLOT(setValue(int)));
-//    connect(m_ui->speedKiSlider, SIGNAL(valueChanged(int)), m_ui->speedKiLineEdit, SLOT(setValue(int)));
-//    connect(m_ui->speedKpSlider, SIGNAL(valueChanged(int)), m_ui->speedKpLineEdit, SLOT(setValue(int)));
+    connect(m_ui->speedKiDoubleSpinBox, SIGNAL(valueChanged(double)), m_ui->speedKiSlider, SLOT(doubleSetValue(double)));
+    connect(m_ui->speedKpDoubleSpinBox, SIGNAL(valueChanged(double)), m_ui->speedKpSlider, SLOT(doubleSetValue(double)));
+    connect(m_ui->speedKiSlider, SIGNAL(doubleValueChanged(double)), m_ui->speedKiDoubleSpinBox, SLOT(setValue(double)));
+    connect(m_ui->speedKpSlider, SIGNAL(doubleValueChanged(double)), m_ui->speedKpDoubleSpinBox, SLOT(setValue(double)));
+
+    connect(m_ui->positionKiDoubleSpinBox, SIGNAL(valueChanged(double)), m_ui->positionKiSlider, SLOT(doubleSetValue(double)));
+    connect(m_ui->positionKpDoubleSpinBox, SIGNAL(valueChanged(double)), m_ui->positionKpSlider, SLOT(doubleSetValue(double)));
+    connect(m_ui->positionKiSlider, SIGNAL(doubleValueChanged(double)), m_ui->positionKiDoubleSpinBox, SLOT(setValue(double)));
+    connect(m_ui->positionKpSlider, SIGNAL(doubleValueChanged(double)), m_ui->positionKpDoubleSpinBox, SLOT(setValue(double)));
+
+    connect(m_ui->currentIqKpDoubleSpinBox, SIGNAL(valueChanged(double)), m_ui->currentIqKpSlider, SLOT(doubleSetValue(double)));
+    connect(m_ui->currentIqKiDoubleSpinBox, SIGNAL(valueChanged(double)), m_ui->currentIqKiSlider, SLOT(doubleSetValue(double)));
+    connect(m_ui->currentIqKpSlider, SIGNAL(doubleValueChanged(double)), m_ui->currentIqKpDoubleSpinBox, SLOT(setValue(double)));
+    connect(m_ui->currentIqKiSlider, SIGNAL(doubleValueChanged(double)), m_ui->currentIqKiDoubleSpinBox, SLOT(setValue(double)));
+
+    connect(m_ui->currentIdKpDoubleSpinBox, SIGNAL(valueChanged(double)), m_ui->currentIdKpSlider, SLOT(doubleSetValue(double)));
+    connect(m_ui->currentIdKiDoubleSpinBox, SIGNAL(valueChanged(double)), m_ui->currentIdKiSlider, SLOT(doubleSetValue(double)));
+    connect(m_ui->currentIdKpSlider, SIGNAL(doubleValueChanged(double)), m_ui->currentIdKpDoubleSpinBox, SLOT(setValue(double)));
+    connect(m_ui->currentIdKiSlider, SIGNAL(doubleValueChanged(double)), m_ui->currentIdKiDoubleSpinBox, SLOT(setValue(double)));
 }
 
 void MainWindow::processErrors(QCanBusDevice::CanBusError error) const

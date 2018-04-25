@@ -19,7 +19,8 @@ HEADERS += \
     sendframebox.h \
     themewidget.h \
     ECanVci.h \
-    chartview.h
+    chartview.h \
+    doubleslider.h
 
 FORMS   += mainwindow.ui \
     connectdialog.ui \
