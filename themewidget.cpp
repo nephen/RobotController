@@ -194,8 +194,6 @@ QChart *ThemeWidget::createSpeedSplineChart() const
     chart->axisY()->setRange(0, m_speedValueMax);
     chart->axisX()->setTitleText("Time:s");
     chart->axisY()->setTitleText("Speed:RPM");
-//    QValueAxis * test = qobject_cast<QValueAxis *>(speedTargetSplineSeries->attachedAxes());
-//    qDebug() << test->max();
     // Add space to label to add space between labels and axis
     static_cast<QValueAxis *>(chart->axisY())->setLabelFormat("%.1f  ");
 
@@ -330,26 +328,29 @@ void ThemeWidget::updateUI()
 void ThemeWidget::handleTimeout()
 {
     qreal x,y;
+    QValueAxis * xAxes;
 
+    xAxes = dynamic_cast<QValueAxis *>(speedTargetSplineSeries->attachedAxes().constFirst()); //Cast to a derived class
     x = speedSplineChart->plotArea().width()/m_speed_axis->tickCount();
-    y = m_speedValueCount/m_speed_axis->tickCount();
-//    qDebug() << m_speed_axis->max() << m_speed_axis->min();
+    y = (xAxes->max() - xAxes->min())/m_speed_axis->tickCount();
     m_speed_x += y;
     m_received_value_y = QRandomGenerator::global()->bounded(m_speedValueMax);   //received speed value
     speedSplineSeries->append(m_speed_x, m_received_value_y);
     speedTargetSplineSeries->append(m_speed_x, speedTargetValueDoubleSpinBox->value());
     speedSplineChart->scroll(x, 0);
 
+    xAxes = dynamic_cast<QValueAxis *>(positionTargetSplineSeries->attachedAxes().constFirst());
     x = positionSplineChart->plotArea().width()/m_position_axis->tickCount();
-    y = m_positionValueCount/m_position_axis->tickCount();
+    y = (xAxes->max() - xAxes->min())/m_position_axis->tickCount();
     m_position_x += y;
     m_received_value_y = QRandomGenerator::global()->bounded(m_positionValueMax);   //received position value
     positionSplineSeries->append(m_position_x, m_received_value_y);
     positionTargetSplineSeries->append(m_position_x, positionTargetValueDoubleSpinBox->value());
     positionSplineChart->scroll(x, 0);
 
+    xAxes = dynamic_cast<QValueAxis *>(currentTargetSplineSeries->attachedAxes().constFirst());
     x = currentSplineChart->plotArea().width()/m_current_axis->tickCount();
-    y = m_currentValueCount/m_current_axis->tickCount();
+    y = (xAxes->max() - xAxes->min())/m_current_axis->tickCount();
     m_current_x += y;
     m_received_value_y = QRandomGenerator::global()->bounded(m_currentValueMax);   //received current value
     currentSplineSeries->append(m_current_x, m_received_value_y);
