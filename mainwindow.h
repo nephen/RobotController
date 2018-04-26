@@ -76,8 +76,8 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    int m_lib_connect;
-    int m_devtype;
+    static int m_lib_connect;
+    static int m_devtype;
 
 private slots:
     void processReceivedFrames();
@@ -87,10 +87,7 @@ private slots:
     void disconnectDevice();
     void processFramesWritten(qint64);
     void showSendInfo(QString s);
-    void ReceiveThread(void);
-
-signals:
-    void updateConnectStatus(int, int);
+    void startReceiveThread(void);
 
 protected:
     void closeEvent(QCloseEvent *event) override;

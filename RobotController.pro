@@ -20,7 +20,8 @@ HEADERS += \
     themewidget.h \
     ECanVci.h \
     chartview.h \
-    doubleslider.h
+    doubleslider.h \
+    receiveworkerthread.h
 
 FORMS   += mainwindow.ui \
     connectdialog.ui \

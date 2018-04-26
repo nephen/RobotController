@@ -60,11 +60,13 @@
 #include <QThread>
 #include "ECanVci.h"
 #include "doubleslider.h"
+#include "receiveworkerthread.h"
+
+int MainWindow::m_lib_connect = USBCAN1;
+int MainWindow::m_devtype = 0;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    m_lib_connect(0),
-    m_devtype(USBCAN1),
     m_ui(new Ui::MainWindow)
 {
     m_ui->setupUi(this);
@@ -79,10 +81,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     initActionsConnections();
     QTimer::singleShot(50, m_lib_connectDialog, &ConnectDialog::show);
-
-    QTimer *timer = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), this, SLOT(ReceiveThread()));
-    timer->start(1000);
 }
 
 MainWindow::~MainWindow()
@@ -111,7 +109,6 @@ void MainWindow::initActionsConnections()
     connect(m_ui->actionPluginDocumentation, &QAction::triggered, this, []() {
         QDesktopServices::openUrl(QUrl("http://doc.qt.io/qt-5/qtcanbus-backends.html#can-bus-plugins"));
     });
-    connect(this, &updateConnectStatus, m_ui->sendFrameBox, &SendFrameBox::updateConnectStatus);
 
     //control part
     connect(m_ui->speedKiDoubleSpinBox, SIGNAL(valueChanged(double)), m_ui->speedKiSlider, SLOT(doubleSetValue(double)));
@@ -246,6 +243,7 @@ void MainWindow::connectDeviceByLib() //Refer to the manufacturer's sample code 
     m_ui->actionDisconnect->setEnabled(true);
 
     m_ui->sendFrameBox->setEnabled(true);
+    startReceiveThread();
 
     if(m_lib_connect==0)
     {
@@ -273,7 +271,6 @@ void MainWindow::connectDevice()
         m_status->setText(tr("Use lib instead for Error creating device '%1', reason: '%2'")
                           .arg(p.pluginName).arg(errorString));
         connectDeviceByLib(); //Use libraries instead of plugins
-        emit updateConnectStatus(m_lib_connect, m_devtype);
         return;
     }
 
@@ -325,8 +322,6 @@ void MainWindow::disconnectDevice()
         m_ui->sendFrameBox->setEnabled(false);
 
         m_status->setText(tr("Disconnected"));
-
-        emit updateConnectStatus(m_lib_connect, m_devtype);
 
         return;
     }
@@ -414,60 +409,11 @@ void MainWindow::showSendInfo(QString s)
     m_ui->receivedMessagesEdit->append(s);
 }
 
-void MainWindow::ReceiveThread(void)
+void MainWindow::startReceiveThread(void)
 {
-    CAN_OBJ frameinfo[50];
-
-    int len=1;
-    int i=0;
-    QString str,tmpstr;
-
-//    while(1)
-    {
-        QThread::msleep(100);
-//        qDebug() << "received thread 100";
-//        if(m_connect==0)
-//            break;
-        len=Receive(m_devtype,0,0,frameinfo,50,100);
-        if(len>0)
-        {
-
-            for(i=0;i<len;i++)
-            {
-                str="Rec:\n";
-                if(frameinfo[i].TimeFlag==0)
-                    tmpstr="Time:  ";
-                else
-                    tmpstr=QString("Time:%1\n").arg(frameinfo[i].TimeStamp);
-                str+=tmpstr;
-                tmpstr=QString("ID:%1\n").arg(frameinfo[i].ID);
-                str+=tmpstr;
-                str+="Format:";
-                if(frameinfo[i].RemoteFlag==0)
-                    tmpstr="Data ";
-                else
-                    tmpstr="Remote ";
-                str+=tmpstr;
-                str+="Type:";
-                if(frameinfo[i].ExternFlag==0)
-                    tmpstr="Stand ";
-                else
-                    tmpstr="Exten ";
-                str+=tmpstr;
-                showInfo(str);
-                if(frameinfo[i].RemoteFlag==0)
-                {
-                    str="Data:";
-                    if(frameinfo[i].DataLen>8)
-                        frameinfo[i].DataLen=8;
-                    for(int j=0;j<frameinfo[i].DataLen;j++)
-                    {
-                        tmpstr=QString("%1").arg(frameinfo[i].Data[j]);
-                        str+=tmpstr;
-                    }
-                    showInfo(str);
-                }
-            }
-        }
-    }
+    ReceiveWorkerThread *workerThread = new ReceiveWorkerThread(this);
+    connect(workerThread, SIGNAL(resultReady(QString)), this, SLOT(showSendInfo(QString)));
+    // 线程结束后，自动销毁
+    connect(workerThread, SIGNAL(finished()), workerThread, SLOT(deleteLater()));
+    workerThread->start();
 }

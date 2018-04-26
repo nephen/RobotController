@@ -49,6 +49,7 @@
 ****************************************************************************/
 
 #include "sendframebox.h"
+#include "mainwindow.h"
 #include "ui_sendframebox.h"
 #include "QDebug"
 #include "ECanVci.h"
@@ -128,12 +129,6 @@ void HexStringValidator::setMaxLength(int maxLength)
     m_maxLength = maxLength;
 }
 
-void SendFrameBox::updateConnectStatus(int connect, int dev_type)
-{
-    m_lib_connect_status = connect;
-    m_dev_type_status = dev_type;
-}
-
 SendFrameBox::SendFrameBox(QWidget *parent) :
     QGroupBox(parent),
     m_ui(new Ui::SendFrameBox)
@@ -178,7 +173,7 @@ SendFrameBox::SendFrameBox(QWidget *parent) :
     auto frameIdTextChanged = [this]() {
         const bool hasFrameId = !m_ui->frameIdEdit->text().isEmpty();
         if(hasFrameId) {
-            if(m_lib_connect_status) {
+            if(MainWindow::m_lib_connect) {
                 m_ui->sendButton->setEnabled(false);
                 m_ui->libSendButton->setEnabled(true);
             }
@@ -287,7 +282,7 @@ void SendFrameBox::sendLibFrameData()
 
     qDebug() << "ID is :" << frameinfo.ID;
 
-    if(Transmit(m_dev_type_status,0,0,&frameinfo,1)==1)
+    if(Transmit(MainWindow::m_devtype,0,0,&frameinfo,1)==1)
     {
         sendInfo.append("写入成功");
     }
@@ -361,7 +356,7 @@ SendFrameBox::~SendFrameBox()
 
 void SendFrameBox::on_libSendButton_clicked()
 {
-    if(m_lib_connect_status)
+    if(MainWindow::m_lib_connect)
     {
         sendLibFrameData();
     }
